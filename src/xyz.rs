@@ -7,7 +7,7 @@ use super::attributes::Attribute;
 use super::attributes::Particle;
 
 #[derive(Debug, PartialEq)]
-pub struct XYZParticle<T: Scalar+FromStr> {
+pub struct XYZParticle<T : Scalar> {
     pub name  : std::string::String,
     pub coord : nalgebra::Vector3<T>,
 }
