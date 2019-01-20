@@ -29,3 +29,16 @@ impl<T> Coordinate<T> {
         }
     }
 }
+
+impl<T> Into<nalgebra::Vector3<T>> for Coordinate<T>
+where
+    T: nalgebra::Scalar
+{
+    fn into(self) -> nalgebra::Vector3<T> {
+        match self {
+            Coordinate::Position{x, y, z} => nalgebra::Vector3::new(x, y, z),
+            Coordinate::Velocity{x, y, z} => nalgebra::Vector3::new(x, y, z),
+            Coordinate::Force{x, y, z}    => nalgebra::Vector3::new(x, y, z),
+        }
+    }
+}
