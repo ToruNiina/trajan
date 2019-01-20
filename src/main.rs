@@ -1,5 +1,5 @@
 fn main() {
-    let reader = trajanus::xyz::open_pos::<f64>("example.xyz")
+    let reader = trajanus::xyz::read_pos::<f64>("example.xyz")
         .expect("opening xyz file");
 
     for snapshot in reader {

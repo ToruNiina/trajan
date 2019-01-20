@@ -135,7 +135,7 @@ where
     }
 }
 
-pub fn open<T>(kind: FileKind, fname: &str) -> Result<XYZReader<T, std::fs::File>>
+pub fn read<T>(kind: FileKind, fname: &str) -> Result<XYZReader<T, std::fs::File>>
 where
     T: std::str::FromStr<Err = std::num::ParseFloatError>
 {
@@ -143,7 +143,7 @@ where
     Ok(XYZReader::new(kind, file))
 }
 
-pub fn open_pos<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
+pub fn read_pos<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
 where
     T: std::str::FromStr<Err = std::num::ParseFloatError>
 {
@@ -151,7 +151,7 @@ where
     Ok(XYZReader::new(FileKind::Position, file))
 }
 
-pub fn open_vel<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
+pub fn read_vel<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
 where
     T: std::str::FromStr<Err = std::num::ParseFloatError>
 {
@@ -159,7 +159,7 @@ where
     Ok(XYZReader::new(FileKind::Velocity, file))
 }
 
-pub fn open_force<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
+pub fn read_force<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
 where
     T: std::str::FromStr<Err = std::num::ParseFloatError>
 {
