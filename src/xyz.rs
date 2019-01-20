@@ -1,4 +1,5 @@
 use crate::error::{ErrorKind, Error, Result};
+use crate::particle::{Attribute, Particle};
 use std::io::BufRead; // to use read_line
 
 #[derive(Debug, PartialEq)]
@@ -12,6 +13,29 @@ pub struct XYZParticle<T> {
 impl<T> XYZParticle<T> {
     pub fn new(name: std::string::String, x: T, y: T, z: T) -> Self {
         XYZParticle::<T>{name: name, x: x, y: y, z: z}
+    }
+}
+
+impl<T:nalgebra::Scalar> Particle<T> for XYZParticle<T> {
+    type Value = T;
+    fn mass(&self) -> Option<T> {
+        None
+    }
+    fn pos(&self) -> Option<nalgebra::Vector3<T>> {
+        Some(nalgebra::Vector3::new(self.x, self.y, self.z))
+    }
+    fn vel(&self) -> Option<nalgebra::Vector3<T>> {
+        None
+    }
+    fn frc(&self) -> Option<nalgebra::Vector3<T>> {
+        None
+    }
+    fn attribute(&self, name: std::string::String) -> Option<Attribute> {
+        return match name.as_str() {
+            "name" => Some(Attribute::String(self.name.clone())),
+            "elem" => Some(Attribute::String(self.name.clone())),
+            _ => None,
+        }
     }
 }
 
