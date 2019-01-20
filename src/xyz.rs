@@ -149,3 +149,27 @@ where
     let file = std::fs::File::open(fname)?;
     Ok(XYZReader::new(kind, file))
 }
+
+pub fn open_pos<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
+where
+    T: std::str::FromStr<Err = std::num::ParseFloatError>
+{
+    let file = std::fs::File::open(fname)?;
+    Ok(XYZReader::new(FileKind::Position, file))
+}
+
+pub fn open_vel<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
+where
+    T: std::str::FromStr<Err = std::num::ParseFloatError>
+{
+    let file = std::fs::File::open(fname)?;
+    Ok(XYZReader::new(FileKind::Velocity, file))
+}
+
+pub fn open_force<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
+where
+    T: std::str::FromStr<Err = std::num::ParseFloatError>
+{
+    let file = std::fs::File::open(fname)?;
+    Ok(XYZReader::new(FileKind::Force, file))
+}

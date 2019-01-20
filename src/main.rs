@@ -1,7 +1,5 @@
-use trajanus::coordkind::FileKind;
-
 fn main() {
-    let reader = trajanus::xyz::open::<f64>(FileKind::Position, "example.xyz")
+    let reader = trajanus::xyz::open_pos::<f64>("example.xyz")
         .expect("opening xyz file");
 
     for snapshot in reader {
