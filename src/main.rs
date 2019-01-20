@@ -1,9 +1,7 @@
-use trajanus::xyz::*;
-
 fn main() {
-    let xyz_snapshot = read_xyz_snapshot("example.xyz").expect("read xyz file");
+    let mut reader = trajanus::xyz::open("example.xyz").expect("open xyz file");
+    let xyz_snapshot = reader.read_snapshot::<f64>().expect("read xyz snapshot");
 
-    println!("found {} particles", xyz_snapshot.len());
     for particle in xyz_snapshot.iter() {
         println!("{:?}", particle);
     }
