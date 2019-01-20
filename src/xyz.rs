@@ -1,52 +1,75 @@
-/* ----------- xyz format ----------- */
-
-use crate::error::*;
+use crate::error::{ErrorKind, Error, Result};
 use std::io::BufRead; // for BufReader.lines
 use std::str::FromStr;
-use failure::Context;
 
 #[derive(Debug, PartialEq)]
-pub struct XYZParticle {
+pub struct XYZParticle<T> {
     pub name : std::string::String,
-    pub pos  : nalgebra::Vector3<f64>,
+    pub x    : T,
+    pub y    : T,
+    pub z    : T,
 }
 
-impl FromStr for XYZParticle {
+impl<T> XYZParticle<T> {
+    pub fn new(name: std::string::String, x: T, y: T, z: T) -> Self {
+        XYZParticle::<T>{name: name, x: x, y: y, z: z}
+    }
+}
+
+// "H 1.00 1.00 1.00" -> XYZParticle
+impl<T: FromStr<Err = std::num::ParseFloatError>> FromStr for XYZParticle<T> {
     type Err = Error;
 
-    fn from_str(line: &str) -> std::result::Result<Self, Self::Err> {
+    fn from_str(line: &str) -> Result<Self> {
         let elems: std::vec::Vec<&str> = line.split_whitespace().collect();
 
         if elems.len() != 4 {
-            return Err(Error::new(Context::new(ErrorKind::Format)));
+            return Err(Error::new(failure::Context::new(ErrorKind::Format{
+                error: format!("invalid XYZ format: {}", line.to_string())
+            })));
         }
-        let name = elems[0];
-        let x    = elems[1].parse::<f64>()?;
-        let y    = elems[2].parse::<f64>()?;
-        let z    = elems[3].parse::<f64>()?;
-        Ok(XYZParticle{name: name.to_string(), pos: nalgebra::Vector3::new(x,y,z)})
+
+        let name = elems[0].to_string();
+        let x    = elems[1].parse::<T>()?;
+        let y    = elems[2].parse::<T>()?;
+        let z    = elems[3].parse::<T>()?;
+        Ok(XYZParticle::<T>::new(name, x, y, z))
     }
 }
 
-pub fn read_xyz_snapshot(filename: &str) -> std::result::Result<std::vec::Vec<XYZParticle>, Error> {
-    let mut fbuf = std::io::BufReader::new(std::fs::File::open(filename)?);
+pub struct XYZReader<R> {
+    bufreader: std::io::BufReader<R>,
+}
 
-    let mut line = std::string::String::new();
-    fbuf.read_line(&mut line)?;
+impl<R: std::io::Read> XYZReader<R> {
+    pub fn new(inner: R) -> Self {
+        XYZReader::<R>{bufreader: std::io::BufReader::new(inner)}
+    }
 
-    let number_of_particles = &line.trim().parse::<usize>()?;
-    line.clear();
+    pub fn read_snapshot<T: FromStr<Err = std::num::ParseFloatError>>(&mut self)
+        -> Result<std::vec::Vec<XYZParticle<T>>> {
 
-    fbuf.read_line(&mut line)?; // comment line
-    line.clear();
+        let mut line = std::string::String::new();
 
-    let mut snapshot = std::vec::Vec::with_capacity(*number_of_particles);
-    for _ in 0 .. *number_of_particles {
-        fbuf.read_line(&mut line)?;
-        let particle = line.parse::<XYZParticle>()?;
-        snapshot.push(particle);
+        self.bufreader.read_line(&mut line)?;
+        let num = line.trim().parse::<usize>()?;
         line.clear();
+
+        // comment line
+        self.bufreader.read_line(&mut line)?;
+        line.clear();
+
+        let mut snapshot = std::vec::Vec::with_capacity(num);
+        for _ in 0 .. num {
+            self.bufreader.read_line(&mut line)?;
+            snapshot.push(line.parse::<XYZParticle<T>>()?);
+            line.clear();
+        }
+        Ok(snapshot)
     }
-    Ok(snapshot)
 }
 
+pub fn open(fname: &str) -> Result<XYZReader<std::fs::File>> {
+    let file = std::fs::File::open(fname)?;
+    Ok(XYZReader::new(file))
+}
