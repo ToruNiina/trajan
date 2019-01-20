@@ -37,6 +37,11 @@ impl<T: FromStr<Err = std::num::ParseFloatError>> FromStr for XYZParticle<T> {
     }
 }
 
+pub struct XYZSnapShot<T> {
+    pub comment:   std::string::String,
+    pub particles: std::vec::Vec<XYZParticle<T>>,
+}
+
 pub struct XYZReader<R> {
     bufreader: std::io::BufReader<R>,
 }
@@ -46,9 +51,10 @@ impl<R: std::io::Read> XYZReader<R> {
         XYZReader::<R>{bufreader: std::io::BufReader::new(inner)}
     }
 
-    pub fn read_snapshot<T: FromStr<Err = std::num::ParseFloatError>>(&mut self)
-        -> Result<std::vec::Vec<XYZParticle<T>>> {
-
+    pub fn read_snapshot<T>(&mut self) -> Result<XYZSnapShot<T>>
+        where
+            T: FromStr<Err = std::num::ParseFloatError>
+    {
         let mut line = std::string::String::new();
 
         self.bufreader.read_line(&mut line)?;
@@ -57,15 +63,19 @@ impl<R: std::io::Read> XYZReader<R> {
 
         // comment line
         self.bufreader.read_line(&mut line)?;
+        let comment = line.clone();
         line.clear();
 
-        let mut snapshot = std::vec::Vec::with_capacity(num);
+        let mut particles = std::vec::Vec::with_capacity(num);
         for _ in 0 .. num {
             self.bufreader.read_line(&mut line)?;
-            snapshot.push(line.parse::<XYZParticle<T>>()?);
+            particles.push(line.parse::<XYZParticle<T>>()?);
             line.clear();
         }
-        Ok(snapshot)
+        Ok(XYZSnapShot::<T>{
+            comment: comment,
+            particles: particles,
+        })
     }
 }
 
