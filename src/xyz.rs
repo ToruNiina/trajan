@@ -17,7 +17,10 @@ impl<T> XYZParticle<T> {
 }
 
 // "H 1.00 1.00 1.00" -> XYZParticle
-impl<T: FromStr<Err = std::num::ParseFloatError>> FromStr for XYZParticle<T> {
+impl<T> FromStr for XYZParticle<T>
+    where
+        T: FromStr<Err = std::num::ParseFloatError>
+{
     type Err = Error;
 
     fn from_str(line: &str) -> Result<Self> {
@@ -40,6 +43,15 @@ impl<T: FromStr<Err = std::num::ParseFloatError>> FromStr for XYZParticle<T> {
 pub struct XYZSnapShot<T> {
     pub comment:   std::string::String,
     pub particles: std::vec::Vec<XYZParticle<T>>,
+}
+
+impl<T> XYZSnapShot<T> {
+    pub fn new(comment: std::string::String, particles: std::vec::Vec<XYZParticle<T>>) -> Self {
+        XYZSnapShot::<T>{
+            comment: comment,
+            particles: particles,
+        }
+    }
 }
 
 pub struct XYZReader<R> {
@@ -72,10 +84,7 @@ impl<R: std::io::Read> XYZReader<R> {
             particles.push(line.parse::<XYZParticle<T>>()?);
             line.clear();
         }
-        Ok(XYZSnapShot::<T>{
-            comment: comment,
-            particles: particles,
-        })
+        Ok(XYZSnapShot::new(comment, particles))
     }
 }
 
