@@ -1,24 +1,24 @@
 use crate::error::{ErrorKind, Error, Result};
 use crate::particle::{Attribute, Particle};
-use crate::coordkind::{FileKind, CoordKind};
+use crate::coordkind::{CoordKind, Coordinate};
 use std::io::BufRead; // to use read_line
 
 #[derive(Debug, PartialEq)]
 pub struct XYZParticle<T> {
     pub name : std::string::String,
-    pub xyz  : CoordKind<T>,
+    pub xyz  : Coordinate<T>,
 }
 
 impl<T> XYZParticle<T>
 where
     T: std::str::FromStr<Err = std::num::ParseFloatError>
 {
-    pub fn new(name: std::string::String, xyz: CoordKind<T>) -> Self {
+    pub fn new(name: std::string::String, xyz: Coordinate<T>) -> Self {
         XYZParticle{name: name, xyz: xyz}
     }
 
     // "H 1.00 1.00 1.00" -> XYZParticle
-    fn from_line(line: &str, kind: FileKind) -> Result<Self> {
+    fn from_line(line: &str, kind: CoordKind) -> Result<Self> {
         let elems: std::vec::Vec<&str> = line.split_whitespace().collect();
 
         if elems.len() != 4 {
@@ -32,7 +32,7 @@ where
         let y    = elems[2].parse()?;
         let z    = elems[3].parse()?;
 
-        Ok(XYZParticle::new(name, CoordKind::build(kind, x, y, z)))
+        Ok(XYZParticle::new(name, Coordinate::build(kind, x, y, z)))
     }
 }
 
@@ -42,21 +42,21 @@ impl<T: nalgebra::Scalar> Particle<T> for XYZParticle<T> {
         None
     }
     fn pos(&self) -> Option<nalgebra::Vector3<T>> {
-        return if let CoordKind::Position{x, y, z} = self.xyz {
+        return if let Coordinate::Position{x, y, z} = self.xyz {
             Some(nalgebra::Vector3::new(x, y, z))
         } else {
             None
         }
     }
     fn vel(&self) -> Option<nalgebra::Vector3<T>> {
-        return if let CoordKind::Velocity{x, y, z} = self.xyz {
+        return if let Coordinate::Velocity{x, y, z} = self.xyz {
             Some(nalgebra::Vector3::new(x, y, z))
         } else {
             None
         }
     }
     fn force(&self) -> Option<nalgebra::Vector3<T>> {
-        return if let CoordKind::Force{x, y, z} = self.xyz {
+        return if let Coordinate::Force{x, y, z} = self.xyz {
             Some(nalgebra::Vector3::new(x, y, z))
         } else {
             None
@@ -81,10 +81,14 @@ impl<T> XYZSnapshot<T> {
                particles: std::vec::Vec<XYZParticle<T>>) -> Self {
         XYZSnapshot{comment: comment, particles: particles}
     }
+
+    pub fn which(&self) -> std::option::Option<CoordKind> {
+        self.particles.first().map(|p| p.xyz.which())
+    }
 }
 
 pub struct XYZReader<T, R> {
-    pub kind: FileKind,
+    pub kind: CoordKind,
     bufreader: std::io::BufReader<R>,
     _marker: std::marker::PhantomData<T>,
 }
@@ -94,7 +98,7 @@ where
     R: std::io::Read,
     T: std::str::FromStr<Err = std::num::ParseFloatError>
 {
-    pub fn new(kind: FileKind, inner: R) -> Self {
+    pub fn new(kind: CoordKind, inner: R) -> Self {
         XYZReader::<T, R>{
             kind: kind,
             bufreader: std::io::BufReader::new(inner),
@@ -135,7 +139,7 @@ where
     }
 }
 
-pub fn read<T>(kind: FileKind, fname: &str) -> Result<XYZReader<T, std::fs::File>>
+pub fn read<T>(kind: CoordKind, fname: &str) -> Result<XYZReader<T, std::fs::File>>
 where
     T: std::str::FromStr<Err = std::num::ParseFloatError>
 {
@@ -148,7 +152,7 @@ where
     T: std::str::FromStr<Err = std::num::ParseFloatError>
 {
     let file = std::fs::File::open(fname)?;
-    Ok(XYZReader::new(FileKind::Position, file))
+    Ok(XYZReader::new(CoordKind::Position, file))
 }
 
 pub fn read_vel<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
@@ -156,7 +160,7 @@ where
     T: std::str::FromStr<Err = std::num::ParseFloatError>
 {
     let file = std::fs::File::open(fname)?;
-    Ok(XYZReader::new(FileKind::Velocity, file))
+    Ok(XYZReader::new(CoordKind::Velocity, file))
 }
 
 pub fn read_force<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
@@ -164,5 +168,5 @@ where
     T: std::str::FromStr<Err = std::num::ParseFloatError>
 {
     let file = std::fs::File::open(fname)?;
-    Ok(XYZReader::new(FileKind::Force, file))
+    Ok(XYZReader::new(CoordKind::Force, file))
 }

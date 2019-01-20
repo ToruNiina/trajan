@@ -3,6 +3,7 @@ fn main() {
         .expect("opening xyz file");
 
     for snapshot in reader {
+        println!("{:?}", snapshot.which());
         for particle in snapshot.particles {
             println!("{:?}", particle);
         }

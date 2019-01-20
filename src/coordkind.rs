@@ -1,31 +1,31 @@
 #[derive(Debug, PartialEq)]
-pub enum CoordKind<T> {
+pub enum Coordinate<T> {
     Position{x:T, y:T, z:T},
     Velocity{x:T, y:T, z:T},
     Force{x:T, y:T, z:T},
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub enum FileKind {
+pub enum CoordKind {
     Position,
     Velocity,
     Force,
 }
 
-impl<T> CoordKind<T> {
-    pub fn build(kind: FileKind, x: T, y: T, z: T) -> Self {
+impl<T> Coordinate<T> {
+    pub fn build(kind: CoordKind, x: T, y: T, z: T) -> Self {
         match kind {
-            FileKind::Position => CoordKind::Position{x: x, y: y, z: z},
-            FileKind::Velocity => CoordKind::Velocity{x: x, y: y, z: z},
-            FileKind::Force    => CoordKind::Force{x: x, y: y, z: z},
+            CoordKind::Position => Coordinate::Position{x: x, y: y, z: z},
+            CoordKind::Velocity => Coordinate::Velocity{x: x, y: y, z: z},
+            CoordKind::Force    => Coordinate::Force{x: x, y: y, z: z},
         }
     }
 
-    pub fn which(&self) -> FileKind {
+    pub fn which(&self) -> CoordKind {
         match self {
-            CoordKind::Position{x:_,y:_,z:_} => FileKind::Position,
-            CoordKind::Velocity{x:_,y:_,z:_} => FileKind::Velocity,
-            CoordKind::Force{x:_,y:_,z:_}    => FileKind::Force,
+            Coordinate::Position{x:_,y:_,z:_} => CoordKind::Position,
+            Coordinate::Velocity{x:_,y:_,z:_} => CoordKind::Velocity,
+            Coordinate::Force{x:_,y:_,z:_}    => CoordKind::Force,
         }
     }
 }
