@@ -32,11 +32,7 @@ where
         let y    = elems[2].parse::<T>()?;
         let z    = elems[3].parse::<T>()?;
 
-        Ok(XYZParticle::<T>::new(name, match kind {
-            FileKind::Position => CoordKind::Position::<T>{x:x, y:y, z:z},
-            FileKind::Velocity => CoordKind::Velocity::<T>{x:x, y:y, z:z},
-            FileKind::Force    => CoordKind::Force::<T>{x:x, y:y, z:z},
-        }))
+        Ok(XYZParticle::<T>::new(name, CoordKind::build(kind, x, y, z)))
     }
 }
 
@@ -83,10 +79,7 @@ pub struct XYZSnapshot<T> {
 impl<T> XYZSnapshot<T> {
     pub fn new(comment: std::string::String,
                particles: std::vec::Vec<XYZParticle<T>>) -> Self {
-        XYZSnapshot::<T>{
-            comment: comment,
-            particles: particles,
-        }
+        XYZSnapshot::<T>{comment: comment, particles: particles}
     }
 }
 

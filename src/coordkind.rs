@@ -11,3 +11,21 @@ pub enum FileKind {
     Velocity,
     Force,
 }
+
+impl<T> CoordKind<T> {
+    pub fn build(kind: FileKind, x: T, y: T, z: T) -> Self {
+        match kind {
+            FileKind::Position => CoordKind::Position{x: x, y: y, z: z},
+            FileKind::Velocity => CoordKind::Velocity{x: x, y: y, z: z},
+            FileKind::Force    => CoordKind::Force{x: x, y: y, z: z},
+        }
+    }
+
+    pub fn which(&self) -> FileKind {
+        match self {
+            CoordKind::Position::<T>{x:_,y:_,z:_} => FileKind::Position,
+            CoordKind::Velocity::<T>{x:_,y:_,z:_} => FileKind::Velocity,
+            CoordKind::Force::<T>{x:_,y:_,z:_}    => FileKind::Force,
+        }
+    }
+}
