@@ -23,9 +23,9 @@ impl<T> CoordKind<T> {
 
     pub fn which(&self) -> FileKind {
         match self {
-            CoordKind::Position::<T>{x:_,y:_,z:_} => FileKind::Position,
-            CoordKind::Velocity::<T>{x:_,y:_,z:_} => FileKind::Velocity,
-            CoordKind::Force::<T>{x:_,y:_,z:_}    => FileKind::Force,
+            CoordKind::Position{x:_,y:_,z:_} => FileKind::Position,
+            CoordKind::Velocity{x:_,y:_,z:_} => FileKind::Velocity,
+            CoordKind::Force{x:_,y:_,z:_}    => FileKind::Force,
         }
     }
 }

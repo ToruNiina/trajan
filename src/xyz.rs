@@ -14,7 +14,7 @@ where
     T: std::str::FromStr<Err = std::num::ParseFloatError>
 {
     pub fn new(name: std::string::String, xyz: CoordKind<T>) -> Self {
-        XYZParticle::<T>{name: name, xyz: xyz}
+        XYZParticle{name: name, xyz: xyz}
     }
 
     // "H 1.00 1.00 1.00" -> XYZParticle
@@ -28,11 +28,11 @@ where
         }
 
         let name = elems[0].to_string();
-        let x    = elems[1].parse::<T>()?;
-        let y    = elems[2].parse::<T>()?;
-        let z    = elems[3].parse::<T>()?;
+        let x    = elems[1].parse()?;
+        let y    = elems[2].parse()?;
+        let z    = elems[3].parse()?;
 
-        Ok(XYZParticle::<T>::new(name, CoordKind::build(kind, x, y, z)))
+        Ok(XYZParticle::new(name, CoordKind::build(kind, x, y, z)))
     }
 }
 
@@ -42,21 +42,21 @@ impl<T: nalgebra::Scalar> Particle<T> for XYZParticle<T> {
         None
     }
     fn pos(&self) -> Option<nalgebra::Vector3<T>> {
-        return if let CoordKind::Position::<T>{x, y, z} = self.xyz {
+        return if let CoordKind::Position{x, y, z} = self.xyz {
             Some(nalgebra::Vector3::new(x, y, z))
         } else {
             None
         }
     }
     fn vel(&self) -> Option<nalgebra::Vector3<T>> {
-        return if let CoordKind::Velocity::<T>{x, y, z} = self.xyz {
+        return if let CoordKind::Velocity{x, y, z} = self.xyz {
             Some(nalgebra::Vector3::new(x, y, z))
         } else {
             None
         }
     }
     fn force(&self) -> Option<nalgebra::Vector3<T>> {
-        return if let CoordKind::Force::<T>{x, y, z} = self.xyz {
+        return if let CoordKind::Force{x, y, z} = self.xyz {
             Some(nalgebra::Vector3::new(x, y, z))
         } else {
             None
@@ -79,7 +79,7 @@ pub struct XYZSnapshot<T> {
 impl<T> XYZSnapshot<T> {
     pub fn new(comment: std::string::String,
                particles: std::vec::Vec<XYZParticle<T>>) -> Self {
-        XYZSnapshot::<T>{comment: comment, particles: particles}
+        XYZSnapshot{comment: comment, particles: particles}
     }
 }
 
@@ -98,7 +98,7 @@ where
         XYZReader::<T, R>{
             kind: kind,
             bufreader: std::io::BufReader::new(inner),
-            _marker: std::marker::PhantomData::<T>
+            _marker: std::marker::PhantomData
         }
     }
 
