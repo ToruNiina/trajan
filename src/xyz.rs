@@ -59,7 +59,7 @@ impl<T: nalgebra::Scalar> Particle<T> for XYZParticle<T> {
             None
         }
     }
-    fn frc(&self) -> Option<nalgebra::Vector3<T>> {
+    fn force(&self) -> Option<nalgebra::Vector3<T>> {
         return if let CoordKind::Force::<T>{x, y, z} = self.xyz {
             Some(nalgebra::Vector3::new(x, y, z))
         } else {
