@@ -1,6 +1,5 @@
 use crate::error::{ErrorKind, Error, Result};
-use std::io::BufRead; // for BufReader.lines
-use std::str::FromStr;
+use std::io::BufRead; // to use read_line
 
 #[derive(Debug, PartialEq)]
 pub struct XYZParticle<T> {
@@ -17,9 +16,9 @@ impl<T> XYZParticle<T> {
 }
 
 // "H 1.00 1.00 1.00" -> XYZParticle
-impl<T> FromStr for XYZParticle<T>
+impl<T> std::str::FromStr for XYZParticle<T>
     where
-        T: FromStr<Err = std::num::ParseFloatError>
+        T: std::str::FromStr<Err = std::num::ParseFloatError>
 {
     type Err = Error;
 
@@ -65,7 +64,7 @@ impl<R: std::io::Read> XYZReader<R> {
 
     pub fn read_snapshot<T>(&mut self) -> Result<XYZSnapshot<T>>
         where
-            T: FromStr<Err = std::num::ParseFloatError>
+            T: std::str::FromStr<Err = std::num::ParseFloatError>
     {
         let mut line = std::string::String::new();
 
