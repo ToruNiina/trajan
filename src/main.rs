@@ -1,8 +1,9 @@
 fn main() {
-    let mut reader = trajanus::xyz::open("example.xyz").expect("open xyz file");
-    let xyz_snapshot = reader.read_snapshot::<f64>().expect("read xyz snapshot");
+    let reader = trajanus::xyz::open::<f64>("example.xyz").expect("opening xyz file");
 
-    for particle in xyz_snapshot.particles {
-        println!("{:?}", particle);
+    for snapshot in reader {
+        for particle in snapshot.particles {
+            println!("{:?}", particle);
+        }
     }
 }

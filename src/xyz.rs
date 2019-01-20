@@ -53,19 +53,24 @@ impl<T> XYZSnapshot<T> {
     }
 }
 
-pub struct XYZReader<R> {
+pub struct XYZReader<T, R> {
     bufreader: std::io::BufReader<R>,
+    _marker: std::marker::PhantomData<T>,
 }
 
-impl<R: std::io::Read> XYZReader<R> {
+impl<T, R> XYZReader<T, R>
+where
+    R: std::io::Read,
+    T: std::str::FromStr<Err = std::num::ParseFloatError>
+{
     pub fn new(inner: R) -> Self {
-        XYZReader::<R>{bufreader: std::io::BufReader::new(inner)}
+        XYZReader::<T, R>{
+            bufreader: std::io::BufReader::new(inner),
+            _marker: std::marker::PhantomData::<T>
+        }
     }
 
-    pub fn read_snapshot<T>(&mut self) -> Result<XYZSnapshot<T>>
-        where
-            T: std::str::FromStr<Err = std::num::ParseFloatError>
-    {
+    pub fn read_snapshot(&mut self) -> Result<XYZSnapshot<T>> {
         let mut line = std::string::String::new();
 
         self.bufreader.read_line(&mut line)?;
@@ -87,7 +92,21 @@ impl<R: std::io::Read> XYZReader<R> {
     }
 }
 
-pub fn open(fname: &str) -> Result<XYZReader<std::fs::File>> {
+impl<T, R> std::iter::Iterator for XYZReader<T, R>
+where
+    R: std::io::Read,
+    T: std::str::FromStr<Err = std::num::ParseFloatError>
+{
+    type Item = XYZSnapshot<T>;
+    fn next(&mut self) -> std::option::Option<Self::Item> {
+        self.read_snapshot().ok()
+    }
+}
+
+pub fn open<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
+where
+    T: std::str::FromStr<Err = std::num::ParseFloatError>
+{
     let file = std::fs::File::open(fname)?;
     Ok(XYZReader::new(file))
 }
