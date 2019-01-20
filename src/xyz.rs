@@ -11,7 +11,8 @@ pub struct XYZParticle<T> {
 
 impl<T> XYZParticle<T>
 where
-    T: std::str::FromStr<Err = std::num::ParseFloatError>
+    T: std::str::FromStr,
+    Error: std::convert::From<<T as std::str::FromStr>::Err>
 {
     pub fn new(name: std::string::String, xyz: Coordinate<T>) -> Self {
         XYZParticle{name: name, xyz: xyz}
@@ -96,7 +97,8 @@ pub struct XYZReader<T, R> {
 impl<T, R> XYZReader<T, R>
 where
     R: std::io::Read,
-    T: std::str::FromStr<Err = std::num::ParseFloatError>
+    T: std::str::FromStr,
+    Error: std::convert::From<<T as std::str::FromStr>::Err>
 {
     pub fn new(kind: CoordKind, inner: R) -> Self {
         XYZReader::<T, R>{
@@ -131,7 +133,8 @@ where
 impl<T, R> std::iter::Iterator for XYZReader<T, R>
 where
     R: std::io::Read,
-    T: std::str::FromStr<Err = std::num::ParseFloatError>
+    T: std::str::FromStr,
+    Error: std::convert::From<<T as std::str::FromStr>::Err>
 {
     type Item = XYZSnapshot<T>;
     fn next(&mut self) -> std::option::Option<Self::Item> {
@@ -141,7 +144,8 @@ where
 
 pub fn read<T>(kind: CoordKind, fname: &str) -> Result<XYZReader<T, std::fs::File>>
 where
-    T: std::str::FromStr<Err = std::num::ParseFloatError>
+    T: std::str::FromStr,
+    Error: std::convert::From<<T as std::str::FromStr>::Err>
 {
     let file = std::fs::File::open(fname)?;
     Ok(XYZReader::new(kind, file))
@@ -149,7 +153,8 @@ where
 
 pub fn read_pos<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
 where
-    T: std::str::FromStr<Err = std::num::ParseFloatError>
+    T: std::str::FromStr,
+    Error: std::convert::From<<T as std::str::FromStr>::Err>
 {
     let file = std::fs::File::open(fname)?;
     Ok(XYZReader::new(CoordKind::Position, file))
@@ -157,7 +162,8 @@ where
 
 pub fn read_vel<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
 where
-    T: std::str::FromStr<Err = std::num::ParseFloatError>
+    T: std::str::FromStr,
+    Error: std::convert::From<<T as std::str::FromStr>::Err>
 {
     let file = std::fs::File::open(fname)?;
     Ok(XYZReader::new(CoordKind::Velocity, file))
@@ -165,7 +171,8 @@ where
 
 pub fn read_force<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
 where
-    T: std::str::FromStr<Err = std::num::ParseFloatError>
+    T: std::str::FromStr,
+    Error: std::convert::From<<T as std::str::FromStr>::Err>
 {
     let file = std::fs::File::open(fname)?;
     Ok(XYZReader::new(CoordKind::Force, file))
