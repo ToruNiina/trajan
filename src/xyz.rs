@@ -171,7 +171,7 @@ where
 
         // comment line
         self.bufreader.read_line(&mut line)?;
-        let comment = line.trim().clone();
+        let comment = line.trim().to_string();
         line.clear();
 
         let mut particles = std::vec::Vec::with_capacity(num);
