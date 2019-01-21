@@ -1,6 +1,6 @@
 use crate::error::{Error, Result};
 use crate::particle::{Attribute, Particle};
-use crate::coordkind::{CoordKind, Coordinate};
+use crate::coordinate::{CoordKind, Coordinate};
 use std::io::{BufRead, Write}; // to use read_line
 
 #[derive(Debug, PartialEq)]
