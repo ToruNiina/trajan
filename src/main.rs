@@ -5,7 +5,7 @@ fn main() {
     for snapshot in reader {
         println!("{:?}", snapshot.which());
         for particle in snapshot.particles {
-            println!("{:?}", particle);
+            println!("{}", particle);
         }
     }
 }

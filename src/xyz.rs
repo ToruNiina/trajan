@@ -1,7 +1,7 @@
-use crate::error::{ErrorKind, Error, Result};
+use crate::error::{Error, Result};
 use crate::particle::{Attribute, Particle};
 use crate::coordkind::{CoordKind, Coordinate};
-use std::io::BufRead; // to use read_line
+use std::io::{BufRead, Write}; // to use read_line
 
 #[derive(Debug, PartialEq)]
 pub struct XYZParticle<T> {
@@ -23,9 +23,9 @@ where
         let elems: std::vec::Vec<&str> = line.split_whitespace().collect();
 
         if elems.len() != 4 {
-            return Err(Error::new(failure::Context::new(ErrorKind::InvalidFormat{
-                error: format!("invalid XYZ format: {}", line.to_string())
-            })));
+            return Err(Error::invalid_format(
+                format!("invalid XYZ format: {}", line)
+            ));
         }
 
         let name = elems[0].to_string();
@@ -45,6 +45,13 @@ where
     type Err = Error;
     fn from_str(line: &str) -> Result<Self> {
          Self::from_line(line, CoordKind::Position)
+    }
+}
+
+impl<T:std::fmt::Display> std::fmt::Display for XYZParticle<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:8} {:16} {:16} {:16}",
+               self.name, self.xyz[0], self.xyz[1], self.xyz[2])
     }
 }
 
@@ -186,4 +193,32 @@ where
 {
     let file = std::fs::File::open(fname)?;
     Ok(XYZReader::new(CoordKind::Force, file))
+}
+
+
+
+pub struct XYZWriter<W: std::io::Write> {
+    bufwriter: std::io::BufWriter<W>,
+}
+
+impl<W: std::io::Write> XYZWriter<W> {
+    pub fn new(inner: W) -> Self {
+        XYZWriter{
+            bufwriter: std::io::BufWriter::new(inner),
+        }
+    }
+    pub fn write_snapshot<T>(&mut self, ss: XYZSnapshot<T>) -> Result<()>
+    where
+        T: std::fmt::Display
+    {
+        self.bufwriter.write(ss.particles.len().to_string().as_bytes())?;
+        self.bufwriter.write(b"\n")?;
+        self.bufwriter.write(ss.comment.as_bytes())?;
+        self.bufwriter.write(b"\n")?;
+        for particle in ss.particles {
+            self.bufwriter.write(particle.to_string().as_bytes())?;
+            self.bufwriter.write(b"\n")?;
+        }
+        Ok(())
+    }
 }
