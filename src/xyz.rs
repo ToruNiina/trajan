@@ -37,6 +37,17 @@ where
     }
 }
 
+impl<T> std::str::FromStr for XYZParticle<T>
+where
+    T: std::str::FromStr,
+    Error: std::convert::From<<T as std::str::FromStr>::Err>
+{
+    type Err = Error;
+    fn from_str(line: &str) -> Result<Self> {
+         Self::from_line(line, CoordKind::Position)
+    }
+}
+
 impl<T: nalgebra::Scalar> Particle<T> for XYZParticle<T> {
     type Value = T;
     fn mass(&self) -> Option<T> {
