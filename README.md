@@ -1,2 +1,2 @@
-# trajanus
+# trajan
 trajectory analysis
