@@ -77,7 +77,6 @@ impl<T: nalgebra::Scalar> Particle<T> for XYZParticle<T> {
     fn attribute(&self, name: std::string::String) -> Option<Attribute> {
         return match name.as_str() {
             "name" => Some(Attribute::String(self.name.clone())),
-            "elem" => Some(Attribute::String(self.name.clone())),
             _ => None,
         }
     }
