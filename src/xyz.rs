@@ -3,9 +3,12 @@ use crate::particle::{Attribute, Particle};
 use crate::coordinate::{CoordKind, Coordinate};
 use std::io::{BufRead, Write}; // to use read_line
 
+/// Particle contained in a xyz file.
 #[derive(Debug, PartialEq)]
 pub struct XYZParticle<T> {
+    /// name of this particle.
     pub name : std::string::String,
+    /// coordinate of this particle.
     pub xyz  : Coordinate<T>,
 }
 
@@ -14,6 +17,7 @@ where
     T: std::str::FromStr,
     Error: std::convert::From<<T as std::str::FromStr>::Err>
 {
+    /// construct XYZParticle.
     pub fn new(name: std::string::String, xyz: Coordinate<T>) -> Self {
         XYZParticle{name: name, xyz: xyz}
     }
@@ -43,12 +47,15 @@ where
     Error: std::convert::From<<T as std::str::FromStr>::Err>
 {
     type Err = Error;
+    /// read xyz line such as "H   1.00 1.00 1.00" as a position of particle.
     fn from_str(line: &str) -> Result<Self> {
          Self::from_line(line, CoordKind::Position)
     }
 }
 
 impl<T:std::fmt::Display> std::fmt::Display for XYZParticle<T> {
+    /// Display xyz line like "H   1.00 1.00 1.00". The width of the fields
+    /// are fixed.
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{:8} {:16} {:16} {:16}",
                self.name, self.xyz[0], self.xyz[1], self.xyz[2])
@@ -89,22 +96,49 @@ impl<T: nalgebra::Scalar> Particle<T> for XYZParticle<T> {
     }
 }
 
+/// Contains a snapshot in XYZ trajectory file.
 pub struct XYZSnapshot<T> {
+    /// Comment for the snapshot (the second line in the snapshot).
+    /// The line feed at the end of the line is trimmed.
     pub comment:   std::string::String,
+    /// Vec of particles contained in the snapshot.
     pub particles: std::vec::Vec<XYZParticle<T>>,
 }
 
 impl<T> XYZSnapshot<T> {
+    /// Constructs snapshot.
     pub fn new(comment: std::string::String,
                particles: std::vec::Vec<XYZParticle<T>>) -> Self {
         XYZSnapshot{comment: comment, particles: particles}
     }
 
+    /// Gets CoordKind in the XYZSnapshot. Returns None if the snapshot does not
+    /// have any particles because the coordinate kind cannot be determined
+    /// without particle.
     pub fn which(&self) -> std::option::Option<CoordKind> {
         self.particles.first().map(|p| p.xyz.which())
     }
 }
 
+/// Reads XYZSnapshot.
+///
+/// It can be used as a iterator that reads snapshots until it reaches to the
+/// EOF.
+///
+/// When constructing reader, the CoordKind that represents which kind of
+/// coordinate is contained in a file is needed to be provided.
+///
+/// Also, the precision of the floating point that is used to contain the data
+/// is also required. To specify the precision, you can use `.f64()` and
+/// `.f32()` functions.
+///
+/// ```no_run
+/// use trajan::xyz::XYZReader;
+/// let reader = XYZReader::open_pos("example.xyz").unwrap().f64();
+/// for snapshot in reader {
+///     println!("{} particles in a snapshot", snapshot.particles.len());
+/// }
+/// ```
 pub struct XYZReader<T, R> {
     pub kind: CoordKind,
     bufreader: std::io::BufReader<R>,
@@ -117,6 +151,7 @@ where
     T: std::str::FromStr,
     Error: std::convert::From<<T as std::str::FromStr>::Err>
 {
+    /// constructing XYZReader.
     pub fn new(kind: CoordKind, inner: R) -> Self {
         XYZReader::<T, R>{
             kind: kind,
@@ -125,6 +160,8 @@ where
         }
     }
 
+    /// Reads one snapshot from underlying `R: std::io::Read`.
+    /// Fails if the file is formatted in an invalid way or reaches to the end.
     pub fn read_snapshot(&mut self) -> Result<XYZSnapshot<T>> {
         let mut line = std::string::String::new();
 
@@ -134,7 +171,7 @@ where
 
         // comment line
         self.bufreader.read_line(&mut line)?;
-        let comment = line.clone();
+        let comment = line.trim().clone();
         line.clear();
 
         let mut particles = std::vec::Vec::with_capacity(num);
@@ -152,6 +189,7 @@ where
     T: std::str::FromStr,
     Error: std::convert::From<<T as std::str::FromStr>::Err>
 {
+    /// Opens file and constructs XYZReader by using the file.
     pub fn open<P>(kind: CoordKind, path: P) -> Result<Self>
     where
         P: std::convert::AsRef<std::path::Path>
@@ -164,6 +202,8 @@ where
         })
     }
 
+    /// Opens file and constructs XYZReader by using the file.
+    /// The coordinate is considered to be Position.
     pub fn open_pos<P>(path: P) -> Result<Self>
     where
         P: std::convert::AsRef<std::path::Path>
@@ -175,6 +215,8 @@ where
             _marker: std::marker::PhantomData
         })
     }
+    /// Opens file and constructs XYZReader by using the file.
+    /// The coordinate is considered to be Velocity.
     pub fn open_vel<P>(path: P) -> Result<Self>
     where
         P: std::convert::AsRef<std::path::Path>
@@ -186,6 +228,8 @@ where
             _marker: std::marker::PhantomData
         })
     }
+    /// Opens file and constructs XYZReader by using the file.
+    /// The coordinate is considered to be Force.
     pub fn open_force<P>(path: P) -> Result<Self>
     where
         P: std::convert::AsRef<std::path::Path>
@@ -238,6 +282,7 @@ impl<R> XYZReader<f64, R> {
     pub fn f64(self) -> Self {self}
 }
 
+/// Enables XYZReader to be used as a Iterator of XYZSnapShot.
 impl<T, R> std::iter::Iterator for XYZReader<T, R>
 where
     R: std::io::Read,
@@ -250,16 +295,29 @@ where
     }
 }
 
+/// Writes XYZSnapshot.
+///
+/// ```no_run
+/// use trajan::xyz::{XYZReader, XYZWriter};
+/// let reader     = XYZReader::open_pos("example.xyz").unwrap().f64();
+/// let mut writer = XYZWriter::new(std::io::stdout());
+/// for snapshot in reader {
+///     writer.write_snapshot(snapshot).unwrap();
+/// }
+/// ```
 pub struct XYZWriter<W: std::io::Write> {
     bufwriter: std::io::BufWriter<W>,
 }
 
 impl<W: std::io::Write> XYZWriter<W> {
+    /// Constructs XYZReader.
     pub fn new(inner: W) -> Self {
         XYZWriter{
             bufwriter: std::io::BufWriter::new(inner),
         }
     }
+
+    /// writes a snapshot.
     pub fn write_snapshot<T>(&mut self, ss: XYZSnapshot<T>) -> Result<()>
     where
         T: std::fmt::Display
@@ -277,6 +335,7 @@ impl<W: std::io::Write> XYZWriter<W> {
 }
 
 impl XYZWriter<std::fs::File> {
+    /// opens a file in path and construct XYZWriter using the file.
     pub fn open<P>(path: P) -> Result<Self>
     where
         P: std::convert::AsRef<std::path::Path>
