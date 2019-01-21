@@ -1,3 +1,23 @@
+/// An enum to represent which kind of vector the data means.
+///
+/// Generally, which kind of vector is contained in a file cannot be deduced by
+/// only a file format information.
+///
+/// Accessible with `operator[]` and `.x()` methods regardless of the kind.
+///
+/// ```
+/// use trajan::coordinate::*;
+/// let p = Coordinate::<f64>::build(CoordKind::Position, 1.0, 2.0, 3.0);
+/// println!("{} {} {}", p.x(), p.y(), p.z());
+/// println!("{} {} {}", p[0],  p[1],  p[2]);
+/// ```
+///
+/// Also, it can be converted into nalgebra::Vector3.
+/// ```
+/// use trajan::coordinate::*;
+/// let p = Coordinate::<f64>::build(CoordKind::Position, 1.0, 2.0, 3.0);
+/// let v: nalgebra::Vector3<f64> = Into::into(p);
+/// ```
 #[derive(Debug, PartialEq)]
 pub enum Coordinate<T> {
     Position{x:T, y:T, z:T},
@@ -5,6 +25,10 @@ pub enum Coordinate<T> {
     Force{x:T, y:T, z:T},
 }
 
+/// A flag to represent which kind of vector is contained in a file.
+///
+/// Generally, which kind of vector is contained in a file cannot be deduced by
+/// only a file format information.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum CoordKind {
     Position,
@@ -13,6 +37,7 @@ pub enum CoordKind {
 }
 
 impl<T> Coordinate<T> {
+    /// convert (x, y, z) into `Coordinate` with a value of `CoordKind`.
     pub fn build(kind: CoordKind, x: T, y: T, z: T) -> Self {
         match kind {
             CoordKind::Position => Coordinate::Position{x: x, y: y, z: z},
@@ -21,6 +46,8 @@ impl<T> Coordinate<T> {
         }
     }
 
+    /// get CoordKind corresponds to the current Coordinate.
+    /// If self contains Coordinate::Position, it returns CoordKind::Position.
     pub fn which(&self) -> CoordKind {
         match self {
             Coordinate::Position{..} => CoordKind::Position,
@@ -29,6 +56,7 @@ impl<T> Coordinate<T> {
         }
     }
 
+    /// borrow x value regardless of the kind.
     pub fn x(&self) -> &T {
         match self {
             Coordinate::Position{x, ..} => x,
@@ -36,6 +64,7 @@ impl<T> Coordinate<T> {
             Coordinate::Force{x, ..}    => x,
         }
     }
+    /// borrow y value regardless of the kind.
     pub fn y(&self) -> &T {
         match self {
             Coordinate::Position{y, ..} => y,
@@ -43,6 +72,7 @@ impl<T> Coordinate<T> {
             Coordinate::Force{y, ..}    => y,
         }
     }
+    /// borrow z value regardless of the kind.
     pub fn z(&self) -> &T {
         match self {
             Coordinate::Position{z, ..} => z,
@@ -51,6 +81,7 @@ impl<T> Coordinate<T> {
         }
     }
 
+    /// borrow mutable x value regardless of the kind.
     pub fn x_mut<'a>(&'a mut self) -> &'a mut T {
         match self {
             Coordinate::Position{x, ..} => x,
@@ -58,6 +89,7 @@ impl<T> Coordinate<T> {
             Coordinate::Force{x, ..}    => x,
         }
     }
+    /// borrow mutable y value regardless of the kind.
     pub fn y_mut<'a>(&'a mut self) -> &'a mut T {
         match self {
             Coordinate::Position{y, ..} => y,
@@ -65,6 +97,7 @@ impl<T> Coordinate<T> {
             Coordinate::Force{y, ..}    => y,
         }
     }
+    /// borrow mutable z value regardless of the kind.
     pub fn z_mut<'a>(&'a mut self) -> &'a mut T {
         match self {
             Coordinate::Position{z, ..} => z,
@@ -76,7 +109,6 @@ impl<T> Coordinate<T> {
 
 impl<T> std::ops::Index<usize> for Coordinate<T> {
     type Output = T;
-
     fn index(&self, idx: usize) -> &Self::Output {
         match idx {
             0 => self.x(),
@@ -98,7 +130,6 @@ impl<T> std::ops::IndexMut<usize> for Coordinate<T> {
     }
 }
 
-
 impl<T> Into<nalgebra::Vector3<T>> for Coordinate<T>
 where
     T: nalgebra::Scalar
@@ -111,7 +142,6 @@ where
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
