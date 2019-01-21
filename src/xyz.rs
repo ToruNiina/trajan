@@ -199,6 +199,41 @@ where
     }
 }
 
+/// methods for explicitly specialized type, f32.
+impl<R> XYZReader<f32, R> {
+    /// An empty function that does nothing.
+    /// It is provided in order to set type of `XYZReader` without explicitly write
+    /// complicated type parameter, such that
+    /// ```
+    /// let r = trajan::xyz::XYZReader::<f32, _>::open_pos("hoge").unwrap();
+    /// //                            ^^^^^^^^^^ why we need the second `_`?
+    /// ```
+    /// By implementing this dummy function, rustc can deduce the type in the
+    /// following, simpler and easier way.
+    /// ```
+    /// let r = trajan::xyz::XYZReader::open_pos("hoge").unwrap().f32();
+    /// //                                                       ^^^^^^ clear!
+    /// ```
+    pub fn f32(self) -> Self {self}
+}
+/// methods for explicitly specialized type, f64.
+impl<R> XYZReader<f64, R> {
+    /// An empty function that does nothing.
+    /// It is provided in order to set type of `XYZReader` without explicitly write
+    /// complicated type parameter, such that
+    /// ```
+    /// let r = trajan::xyz::XYZReader::<f64, _>::open_pos("hoge").unwrap();
+    /// //                            ^^^^^^^^^^ why we need the second `_`?
+    /// ```
+    /// By implementing this dummy function, rustc can deduce the type in the
+    /// following, simpler and easier way.
+    /// ```
+    /// let r = trajan::xyz::XYZReader::open_pos("hoge").unwrap().f64();
+    /// //                                                       ^^^^^^ clear!
+    /// ```
+    pub fn f64(self) -> Self {self}
+}
+
 impl<T, R> std::iter::Iterator for XYZReader<T, R>
 where
     R: std::io::Read,

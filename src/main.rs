@@ -1,6 +1,5 @@
 fn main() {
-    let reader = trajan::xyz::XYZReader::<f64, _>::open_pos("example.xyz")
-        .unwrap();
+    let reader = trajan::xyz::XYZReader::open_pos("example.xyz").unwrap().f32();
 
     for snapshot in reader {
         println!("{:?}", snapshot.which());
