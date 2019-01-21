@@ -77,10 +77,14 @@ impl Display for Error {
 
 impl Error {
     pub fn new(inner: Context<ErrorKind>) -> Error {
-        Error { inner }
+        Error{inner}
     }
     pub fn kind(&self) -> &ErrorKind {
         self.inner.get_context()
+    }
+
+    pub fn invalid_format(s: std::string::String) -> Error {
+        Error{inner: failure::Context::new(ErrorKind::InvalidFormat{error: s})}
     }
 }
 
@@ -94,7 +98,7 @@ impl From<ErrorKind> for Error {
 
 impl From<Context<ErrorKind>> for Error {
     fn from(inner: Context<ErrorKind>) -> Error {
-        Error { inner }
+        Error {inner}
     }
 }
 
@@ -119,5 +123,11 @@ mod tests {
         let e = "foo".parse::<f64>().unwrap_err();
         let err: super::Error = std::convert::From::from(e);
         assert_eq!(*err.kind(), super::ErrorKind::ParseError);
+    }
+
+    #[test]
+    fn from_invalid_format() {
+        let err = super::Error::invalid_format("test".to_string());
+        assert_eq!(*err.kind(), super::ErrorKind::InvalidFormat{error: "test".to_string()});
     }
 }
