@@ -147,6 +147,58 @@ where
     }
 }
 
+impl<T> XYZReader<T, std::fs::File>
+where
+    T: std::str::FromStr,
+    Error: std::convert::From<<T as std::str::FromStr>::Err>
+{
+    pub fn open<P>(kind: CoordKind, path: P) -> Result<Self>
+    where
+        P: std::convert::AsRef<std::path::Path>
+    {
+        let f = std::fs::File::open(path)?;
+        Ok(XYZReader::<T, std::fs::File>{
+            kind: kind,
+            bufreader: std::io::BufReader::new(f),
+            _marker: std::marker::PhantomData
+        })
+    }
+
+    pub fn open_pos<P>(path: P) -> Result<Self>
+    where
+        P: std::convert::AsRef<std::path::Path>
+    {
+        let f = std::fs::File::open(path)?;
+        Ok(XYZReader::<T, std::fs::File>{
+            kind: CoordKind::Position,
+            bufreader: std::io::BufReader::new(f),
+            _marker: std::marker::PhantomData
+        })
+    }
+    pub fn open_vel<P>(path: P) -> Result<Self>
+    where
+        P: std::convert::AsRef<std::path::Path>
+    {
+        let f = std::fs::File::open(path)?;
+        Ok(XYZReader::<T, std::fs::File>{
+            kind: CoordKind::Velocity,
+            bufreader: std::io::BufReader::new(f),
+            _marker: std::marker::PhantomData
+        })
+    }
+    pub fn open_force<P>(path: P) -> Result<Self>
+    where
+        P: std::convert::AsRef<std::path::Path>
+    {
+        let f = std::fs::File::open(path)?;
+        Ok(XYZReader::<T, std::fs::File>{
+            kind: CoordKind::Force,
+            bufreader: std::io::BufReader::new(f),
+            _marker: std::marker::PhantomData
+        })
+    }
+}
+
 impl<T, R> std::iter::Iterator for XYZReader<T, R>
 where
     R: std::io::Read,
@@ -158,44 +210,6 @@ where
         self.read_snapshot().ok()
     }
 }
-
-pub fn read<T>(kind: CoordKind, fname: &str) -> Result<XYZReader<T, std::fs::File>>
-where
-    T: std::str::FromStr,
-    Error: std::convert::From<<T as std::str::FromStr>::Err>
-{
-    let file = std::fs::File::open(fname)?;
-    Ok(XYZReader::new(kind, file))
-}
-
-pub fn read_pos<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
-where
-    T: std::str::FromStr,
-    Error: std::convert::From<<T as std::str::FromStr>::Err>
-{
-    let file = std::fs::File::open(fname)?;
-    Ok(XYZReader::new(CoordKind::Position, file))
-}
-
-pub fn read_vel<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
-where
-    T: std::str::FromStr,
-    Error: std::convert::From<<T as std::str::FromStr>::Err>
-{
-    let file = std::fs::File::open(fname)?;
-    Ok(XYZReader::new(CoordKind::Velocity, file))
-}
-
-pub fn read_force<T>(fname: &str) -> Result<XYZReader<T, std::fs::File>>
-where
-    T: std::str::FromStr,
-    Error: std::convert::From<<T as std::str::FromStr>::Err>
-{
-    let file = std::fs::File::open(fname)?;
-    Ok(XYZReader::new(CoordKind::Force, file))
-}
-
-
 
 pub struct XYZWriter<W: std::io::Write> {
     bufwriter: std::io::BufWriter<W>,
