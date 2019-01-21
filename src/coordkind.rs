@@ -42,3 +42,43 @@ where
         }
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn which_coordinate() {
+        let p = Coordinate::build(CoordKind::Position, 1.0, 2.0, 3.0);
+        assert_eq!(p.which(), CoordKind::Position);
+
+        let v = Coordinate::build(CoordKind::Velocity, 1.0, 2.0, 3.0);
+        assert_eq!(v.which(), CoordKind::Velocity);
+
+        let f = Coordinate::build(CoordKind::Force, 1.0, 2.0, 3.0);
+        assert_eq!(f.which(), CoordKind::Force);
+    }
+
+    #[test]
+    fn to_nalgebra() {
+        {
+            let p  = Coordinate::build(CoordKind::Position, 1.0, 2.0, 3.0);
+            let na: nalgebra::Vector3<f64> = Into::into(p);
+
+            assert_eq!(na, nalgebra::Vector3::new(1.0, 2.0, 3.0));
+        }
+        {
+            let v  = Coordinate::build(CoordKind::Velocity, 1.0, 2.0, 3.0);
+            let na: nalgebra::Vector3<f64> = Into::into(v);
+
+            assert_eq!(na, nalgebra::Vector3::new(1.0, 2.0, 3.0));
+        }
+        {
+            let f  = Coordinate::build(CoordKind::Force, 1.0, 2.0, 3.0);
+            let na: nalgebra::Vector3<f64> = Into::into(f);
+
+            assert_eq!(na, nalgebra::Vector3::new(1.0, 2.0, 3.0));
+        }
+    }
+}
