@@ -23,7 +23,7 @@ where
         let elems: std::vec::Vec<&str> = line.split_whitespace().collect();
 
         if elems.len() != 4 {
-            return Err(Error::new(failure::Context::new(ErrorKind::Format{
+            return Err(Error::new(failure::Context::new(ErrorKind::InvalidFormat{
                 error: format!("invalid XYZ format: {}", line.to_string())
             })));
         }
