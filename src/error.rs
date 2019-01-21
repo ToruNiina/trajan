@@ -2,6 +2,7 @@ use std::fmt;
 use std::fmt::Display;
 use failure::{Backtrace, Context, Fail};
 
+/// An enum to represent an error occured in the library.
 #[derive(Debug, Fail, PartialEq)]
 pub enum ErrorKind {
     #[fail(display = "I/O Error")]
@@ -15,11 +16,13 @@ pub enum ErrorKind {
 }
 impl std::cmp::Eq for ErrorKind {}
 
+/// An error type besed on Faliure library.
 #[derive(Debug)]
 pub struct Error {
     inner: Context<ErrorKind>,
 }
 
+/// A type alias to handle an error occured in the library.
 pub type Result<T> = std::result::Result<T, Error>;
 
 /* ----------- conversion between errors ----------- */
@@ -76,13 +79,16 @@ impl Display for Error {
 }
 
 impl Error {
+    /// Constructs `Error`.
     pub fn new(inner: Context<ErrorKind>) -> Error {
         Error{inner}
     }
+    /// get ErrorKind of the contained error type.
     pub fn kind(&self) -> &ErrorKind {
         self.inner.get_context()
     }
-
+    /// Constructs `trajan::error::Error` from `std::string::String` that
+    /// represents a portion of an input that is formatted in the invalid way.
     pub fn invalid_format(s: std::string::String) -> Error {
         Error{inner: failure::Context::new(ErrorKind::InvalidFormat{error: s})}
     }
