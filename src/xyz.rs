@@ -236,3 +236,13 @@ impl<W: std::io::Write> XYZWriter<W> {
         Ok(())
     }
 }
+
+impl XYZWriter<std::fs::File> {
+    pub fn open<P>(path: P) -> Result<Self>
+    where
+        P: std::convert::AsRef<std::path::Path>
+    {
+        let f = std::fs::File::open(path)?;
+        Ok(XYZWriter{bufwriter: std::io::BufWriter::new(f)})
+    }
+}
