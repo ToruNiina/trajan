@@ -6,12 +6,10 @@ use failure::{Backtrace, Context, Fail};
 pub enum ErrorKind {
     #[fail(display = "I/O Error")]
     Io,
-    #[fail(display = "Invalid Integer Format")]
-    ParseIntError,
-    #[fail(display = "Invalid Float Format")]
-    ParseFloatError,
+    #[fail(display = "Parse Value Error")]
+    ParseError,
     #[fail(display = "Invalid Format: {:?}", error)]
-    Format{
+    InvalidFormat{
         error: std::string::String
     },
 }
@@ -37,7 +35,7 @@ impl std::convert::From<std::io::Error> for Error {
 impl std::convert::From<std::num::ParseFloatError> for Error {
     fn from(error: std::num::ParseFloatError) -> Error {
         Error {
-            inner: error.context(ErrorKind::ParseFloatError),
+            inner: error.context(ErrorKind::ParseError),
         }
     }
 }
@@ -45,7 +43,15 @@ impl std::convert::From<std::num::ParseFloatError> for Error {
 impl std::convert::From<std::num::ParseIntError> for Error {
     fn from(error: std::num::ParseIntError) -> Error {
         Error {
-            inner: error.context(ErrorKind::ParseIntError),
+            inner: error.context(ErrorKind::ParseError),
+        }
+    }
+}
+
+impl std::convert::From<std::string::ParseError> for Error {
+    fn from(error: std::string::ParseError) -> Error {
+        Error {
+            inner: error.context(ErrorKind::ParseError),
         }
     }
 }
@@ -95,51 +101,6 @@ impl From<Context<ErrorKind>> for Error {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn compare_errorkind() {
-        {
-            let lhs = super::ErrorKind::Io;
-            let rhs = super::ErrorKind::Io;
-            assert_eq!(lhs, rhs);
-        }
-        {
-            let lhs = super::ErrorKind::ParseIntError;
-            let rhs = super::ErrorKind::ParseIntError;
-            assert_eq!(lhs, rhs);
-        }
-        {
-            let lhs = super::ErrorKind::ParseFloatError;
-            let rhs = super::ErrorKind::ParseFloatError;
-            assert_eq!(lhs, rhs);
-        }
-        {
-            let lhs = super::ErrorKind::Format{error: "test".to_string()};
-            let rhs = super::ErrorKind::Format{error: "test".to_string()};
-            assert_eq!(lhs, rhs);
-        }
-        {
-            let lhs = super::ErrorKind::Format{error: "test1".to_string()};
-            let rhs = super::ErrorKind::Format{error: "test2".to_string()};
-            assert_ne!(lhs, rhs);
-        }
-
-        {
-            let lhs = super::ErrorKind::Io;
-            let rhs = super::ErrorKind::ParseIntError;
-            assert_ne!(lhs, rhs);
-        }
-        {
-            let lhs = super::ErrorKind::Io;
-            let rhs = super::ErrorKind::ParseFloatError;
-            assert_ne!(lhs, rhs);
-        }
-        {
-            let lhs = super::ErrorKind::Io;
-            let rhs = super::ErrorKind::Format{error: "test".to_string()};
-            assert_ne!(lhs, rhs);
-        }
-    }
-
-    #[test]
     fn from_std_io_error() {
         let e = std::io::Error::new(std::io::ErrorKind::Other, "test");
         let err: super::Error = std::convert::From::from(e);
@@ -150,13 +111,13 @@ mod tests {
     fn from_std_num_parseinterror() {
         let e = "foo".parse::<i64>().unwrap_err();
         let err: super::Error = std::convert::From::from(e);
-        assert_eq!(*err.kind(), super::ErrorKind::ParseIntError);
+        assert_eq!(*err.kind(), super::ErrorKind::ParseError);
     }
 
     #[test]
     fn from_std_num_parsefloaterror() {
         let e = "foo".parse::<f64>().unwrap_err();
         let err: super::Error = std::convert::From::from(e);
-        assert_eq!(*err.kind(), super::ErrorKind::ParseFloatError);
+        assert_eq!(*err.kind(), super::ErrorKind::ParseError);
     }
 }
