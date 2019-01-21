@@ -23,12 +23,81 @@ impl<T> Coordinate<T> {
 
     pub fn which(&self) -> CoordKind {
         match self {
-            Coordinate::Position{x:_,y:_,z:_} => CoordKind::Position,
-            Coordinate::Velocity{x:_,y:_,z:_} => CoordKind::Velocity,
-            Coordinate::Force{x:_,y:_,z:_}    => CoordKind::Force,
+            Coordinate::Position{..} => CoordKind::Position,
+            Coordinate::Velocity{..} => CoordKind::Velocity,
+            Coordinate::Force{..}    => CoordKind::Force,
+        }
+    }
+
+    pub fn x(&self) -> &T {
+        match self {
+            Coordinate::Position{x, ..} => x,
+            Coordinate::Velocity{x, ..} => x,
+            Coordinate::Force{x, ..}    => x,
+        }
+    }
+    pub fn y(&self) -> &T {
+        match self {
+            Coordinate::Position{y, ..} => y,
+            Coordinate::Velocity{y, ..} => y,
+            Coordinate::Force{y, ..}    => y,
+        }
+    }
+    pub fn z(&self) -> &T {
+        match self {
+            Coordinate::Position{z, ..} => z,
+            Coordinate::Velocity{z, ..} => z,
+            Coordinate::Force{z, ..}    => z,
+        }
+    }
+
+    pub fn x_mut<'a>(&'a mut self) -> &'a mut T {
+        match self {
+            Coordinate::Position{x, ..} => x,
+            Coordinate::Velocity{x, ..} => x,
+            Coordinate::Force{x, ..}    => x,
+        }
+    }
+    pub fn y_mut<'a>(&'a mut self) -> &'a mut T {
+        match self {
+            Coordinate::Position{y, ..} => y,
+            Coordinate::Velocity{y, ..} => y,
+            Coordinate::Force{y, ..}    => y,
+        }
+    }
+    pub fn z_mut<'a>(&'a mut self) -> &'a mut T {
+        match self {
+            Coordinate::Position{z, ..} => z,
+            Coordinate::Velocity{z, ..} => z,
+            Coordinate::Force{z, ..}    => z,
         }
     }
 }
+
+impl<T> std::ops::Index<usize> for Coordinate<T> {
+    type Output = T;
+
+    fn index(&self, idx: usize) -> &Self::Output {
+        match idx {
+            0 => self.x(),
+            1 => self.y(),
+            2 => self.z(),
+            _ => panic!("Coordinate: Index out of range"),
+        }
+    }
+}
+
+impl<T> std::ops::IndexMut<usize> for Coordinate<T> {
+    fn index_mut<'a>(&'a mut self, idx: usize) -> &'a mut Self::Output {
+        match idx {
+            0 => self.x_mut(),
+            1 => self.y_mut(),
+            2 => self.z_mut(),
+            _ => panic!("Coordinate: Index_mut out of range"),
+        }
+    }
+}
+
 
 impl<T> Into<nalgebra::Vector3<T>> for Coordinate<T>
 where
@@ -58,6 +127,103 @@ mod tests {
 
         let f = Coordinate::build(CoordKind::Force, 1.0, 2.0, 3.0);
         assert_eq!(f.which(), CoordKind::Force);
+    }
+
+    #[test]
+    fn access_element() {
+        let p = Coordinate::build(CoordKind::Position, 1.0, 2.0, 3.0);
+        assert_eq!(*p.x(), 1.0);
+        assert_eq!(*p.y(), 2.0);
+        assert_eq!(*p.z(), 3.0);
+
+        let v = Coordinate::build(CoordKind::Velocity, 1.0, 2.0, 3.0);
+        assert_eq!(*v.x(), 1.0);
+        assert_eq!(*v.y(), 2.0);
+        assert_eq!(*v.z(), 3.0);
+
+        let f = Coordinate::build(CoordKind::Force, 1.0, 2.0, 3.0);
+        assert_eq!(*f.x(), 1.0);
+        assert_eq!(*f.y(), 2.0);
+        assert_eq!(*f.z(), 3.0);
+    }
+
+    #[test]
+    fn access_element_mut() {
+        let mut p = Coordinate::build(CoordKind::Position, 1.0, 2.0, 3.0);
+        *p.x_mut() += 100.0;
+        *p.y_mut() += 100.0;
+        *p.z_mut() += 100.0;
+        assert_eq!(*p.x(), 101.0);
+        assert_eq!(*p.y(), 102.0);
+        assert_eq!(*p.z(), 103.0);
+
+        let mut v = Coordinate::build(CoordKind::Velocity, 1.0, 2.0, 3.0);
+        *v.x_mut() += 100.0;
+        *v.y_mut() += 100.0;
+        *v.z_mut() += 100.0;
+        assert_eq!(*v.x(), 101.0);
+        assert_eq!(*v.y(), 102.0);
+        assert_eq!(*v.z(), 103.0);
+
+        let mut f = Coordinate::build(CoordKind::Force, 1.0, 2.0, 3.0);
+        *f.x_mut() += 100.0;
+        *f.y_mut() += 100.0;
+        *f.z_mut() += 100.0;
+        assert_eq!(*f.x(), 101.0);
+        assert_eq!(*f.y(), 102.0);
+        assert_eq!(*f.z(), 103.0);
+    }
+
+
+    #[test]
+    fn access_element_idx() {
+        let p = Coordinate::build(CoordKind::Position, 1.0, 2.0, 3.0);
+        assert_eq!(p[0], 1.0);
+        assert_eq!(p[1], 2.0);
+        assert_eq!(p[2], 3.0);
+
+        let v = Coordinate::build(CoordKind::Velocity, 1.0, 2.0, 3.0);
+        assert_eq!(v[0], 1.0);
+        assert_eq!(v[1], 2.0);
+        assert_eq!(v[2], 3.0);
+
+        let f = Coordinate::build(CoordKind::Force, 1.0, 2.0, 3.0);
+        assert_eq!(f[0], 1.0);
+        assert_eq!(f[1], 2.0);
+        assert_eq!(f[2], 3.0);
+    }
+    #[test]
+    fn access_element_idx_mut() {
+        let mut p = Coordinate::build(CoordKind::Position, 1.0, 2.0, 3.0);
+        p[0] += 100.0;
+        p[1] += 100.0;
+        p[2] += 100.0;
+        assert_eq!(p[0], 101.0);
+        assert_eq!(p[1], 102.0);
+        assert_eq!(p[2], 103.0);
+
+        let mut v = Coordinate::build(CoordKind::Velocity, 1.0, 2.0, 3.0);
+        v[0] += 100.0;
+        v[1] += 100.0;
+        v[2] += 100.0;
+        assert_eq!(v[0], 101.0);
+        assert_eq!(v[1], 102.0);
+        assert_eq!(v[2], 103.0);
+
+        let mut f = Coordinate::build(CoordKind::Force, 1.0, 2.0, 3.0);
+        f[0] += 100.0;
+        f[1] += 100.0;
+        f[2] += 100.0;
+        assert_eq!(f[0], 101.0);
+        assert_eq!(f[1], 102.0);
+        assert_eq!(f[2], 103.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn access_out_of_range() {
+        let p = Coordinate::build(CoordKind::Position, 1.0, 2.0, 3.0);
+        println!("{}", p[3]);
     }
 
     #[test]
