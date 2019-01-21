@@ -143,20 +143,20 @@ mod tests {
     fn from_std_io_error() {
         let e = std::io::Error::new(std::io::ErrorKind::Other, "test");
         let err: super::Error = std::convert::From::from(e);
-        assert_eq!(err.kind(), &super::ErrorKind::Io);
+        assert_eq!(*err.kind(), super::ErrorKind::Io);
     }
 
     #[test]
     fn from_std_num_parseinterror() {
         let e = "foo".parse::<i64>().unwrap_err();
         let err: super::Error = std::convert::From::from(e);
-        assert_eq!(err.kind(), &super::ErrorKind::ParseIntError);
+        assert_eq!(*err.kind(), super::ErrorKind::ParseIntError);
     }
 
     #[test]
     fn from_std_num_parsefloaterror() {
         let e = "foo".parse::<f64>().unwrap_err();
         let err: super::Error = std::convert::From::from(e);
-        assert_eq!(err.kind(), &super::ErrorKind::ParseFloatError);
+        assert_eq!(*err.kind(), super::ErrorKind::ParseFloatError);
     }
 }
