@@ -2,7 +2,7 @@ use std::fmt;
 use std::fmt::Display;
 use failure::{Backtrace, Context, Fail};
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Fail, PartialEq)]
 pub enum ErrorKind {
     #[fail(display = "I/O Error")]
     Io,
@@ -14,18 +14,6 @@ pub enum ErrorKind {
     Format{
         error: std::string::String
     },
-}
-
-impl std::cmp::PartialEq for ErrorKind {
-    fn eq(&self, other: &ErrorKind) -> bool {
-        match (self, other) {
-            (ErrorKind::Io,                ErrorKind::Io)                => true,
-            (ErrorKind::ParseIntError,     ErrorKind::ParseIntError)     => true,
-            (ErrorKind::ParseFloatError,   ErrorKind::ParseFloatError)   => true,
-            (ErrorKind::Format{error:lhs}, ErrorKind::Format{error:rhs}) => (lhs == rhs),
-            _ => false,
-        }
-    }
 }
 impl std::cmp::Eq for ErrorKind {}
 
