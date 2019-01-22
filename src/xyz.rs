@@ -22,7 +22,7 @@ use std::io::{BufRead, Write}; // to use read_line
 /// use trajan::xyz::XYZParticle;
 /// let xyz = "H 1.00 1.00 1.00".parse::<XYZParticle<f32>>().unwrap();
 /// ```
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct XYZParticle<T> {
     /// name of this particle.
     pub name : std::string::String,
@@ -75,7 +75,7 @@ impl<T:std::fmt::Display> std::fmt::Display for XYZParticle<T> {
     /// Display xyz line like "H   1.00 1.00 1.00". The width of the fields
     /// are fixed.
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:8} {:16} {:16} {:16}",
+        write!(f, "{:8} {:.16} {:.16} {:.16}",
                self.name, self.xyz[0], self.xyz[1], self.xyz[2])
     }
 }
@@ -115,6 +115,7 @@ impl<T: nalgebra::Scalar> Particle<T> for XYZParticle<T> {
 }
 
 /// Contains a snapshot in XYZ trajectory file.
+#[derive(Debug, Clone, PartialEq)]
 pub struct XYZSnapshot<T> {
     /// Comment for the snapshot (the second line in the snapshot).
     /// The line feed at the end of the line is trimmed.
@@ -320,7 +321,7 @@ where
 /// let reader     = XYZReader::open_pos("example.xyz").unwrap().f64();
 /// let mut writer = XYZWriter::new(std::io::stdout());
 /// for snapshot in reader {
-///     writer.write_snapshot(snapshot).unwrap();
+///     writer.write_snapshot(&snapshot).unwrap();
 /// }
 /// ```
 pub struct XYZWriter<W: std::io::Write> {
@@ -336,7 +337,7 @@ impl<W: std::io::Write> XYZWriter<W> {
     }
 
     /// writes a snapshot.
-    pub fn write_snapshot<T>(&mut self, ss: XYZSnapshot<T>) -> Result<()>
+    pub fn write_snapshot<T>(&mut self, ss: &XYZSnapshot<T>) -> Result<()>
     where
         T: std::fmt::Display
     {
@@ -344,7 +345,7 @@ impl<W: std::io::Write> XYZWriter<W> {
         self.bufwriter.write(b"\n")?;
         self.bufwriter.write(ss.comment.as_bytes())?;
         self.bufwriter.write(b"\n")?;
-        for particle in ss.particles {
+        for particle in &ss.particles {
             self.bufwriter.write(particle.to_string().as_bytes())?;
             self.bufwriter.write(b"\n")?;
         }
