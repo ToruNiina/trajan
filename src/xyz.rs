@@ -363,3 +363,121 @@ impl XYZWriter<std::fs::File> {
         Ok(XYZWriter{bufwriter: std::io::BufWriter::new(f)})
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn create_xyz_particle() {
+        let p = XYZParticle::new(
+            "H".to_string(), Coordinate::Position{x:1.0, y:2.0, z:3.0});
+        assert_eq!(p.name, "H");
+        assert_eq!(p.xyz,  Coordinate::Position{x:1.0, y:2.0, z:3.0});
+    }
+    #[test]
+    fn access_xyz_particle() {
+        let p = XYZParticle::new(
+            "H".to_string(), Coordinate::Position{x:1.0, y:2.0, z:3.0});
+
+        assert_eq!(p.mass(),  None);
+        assert_eq!(p.pos(),   Some(nalgebra::Vector3::new(1.0, 2.0, 3.0)));
+        assert_eq!(p.vel(),   None);
+        assert_eq!(p.force(), None);
+
+        if let Attribute::String(name) = p.attribute("name".to_string()).unwrap() {
+            assert_eq!(name, "H".to_string());
+        } else {
+            assert!(false);
+        }
+    }
+    #[test]
+    fn read_xyz_line() {
+        {
+            let p = XYZParticle::from_line("H 1.0 2.0 3.0", CoordKind::Position).unwrap();
+            assert_eq!(p.name, "H");
+            assert_eq!(p.xyz,  Coordinate::Position{x:1.0, y:2.0, z:3.0});
+        }
+        {
+            let p = "H 1.0 2.0 3.0".parse::<XYZParticle<f64>>().unwrap();
+            assert_eq!(p.name, "H");
+            assert_eq!(p.xyz,  Coordinate::Position{x:1.0, y:2.0, z:3.0});
+        }
+    }
+    #[test]
+    fn construct_xyz_snapshot() {
+        let empty = XYZSnapshot::<f64>::new("test".to_string(), vec![]);
+        assert_eq!(empty.comment, "test");
+        assert_eq!(empty.which(), None);
+        assert!(empty.particles.is_empty());
+
+        let s = XYZSnapshot::<f64>::new("test".to_string(), vec![
+            "H 1.0 2.0 3.0".parse().unwrap(),
+            "C 3.0 2.0 1.0".parse().unwrap(),
+        ]);
+        assert_eq!(s.comment, "test");
+        assert_eq!(s.which(), Some(CoordKind::Position));
+        assert_eq!(s.particles.len(), 2);
+    }
+
+    #[test]
+    fn read_xyz() {
+        let contents: &[u8] = b"\
+            2
+            t = 1
+            H 1.0 2.0 3.0
+            C 3.0 2.0 1.0
+            2
+            t = 2
+            H 1.1 2.1 3.1
+            C 3.1 2.1 1.1
+            2
+            t = 3
+            H 1.2 2.2 3.2
+            C 3.2 2.2 1.2"
+            ;
+        let mut reader = XYZReader::new(CoordKind::Position, contents).f32();
+        let s1 = reader.read_snapshot().unwrap();
+        let s2 = reader.read_snapshot().unwrap();
+        let s3 = reader.read_snapshot().unwrap();
+
+        assert_eq!(s1.comment, "t = 1");
+        assert_eq!(s2.comment, "t = 2");
+        assert_eq!(s3.comment, "t = 3");
+
+        assert_eq!(s1.particles[0].name, "H");
+        assert_eq!(s1.particles[1].name, "C");
+        assert_eq!(s2.particles[0].name, "H");
+        assert_eq!(s2.particles[1].name, "C");
+        assert_eq!(s3.particles[0].name, "H");
+        assert_eq!(s3.particles[1].name, "C");
+
+        assert_eq!(s1.particles[0].xyz, Coordinate::Position{x:1.0,y:2.0,z:3.0});
+        assert_eq!(s1.particles[1].xyz, Coordinate::Position{x:3.0,y:2.0,z:1.0});
+        assert_eq!(s2.particles[0].xyz, Coordinate::Position{x:1.1,y:2.1,z:3.1});
+        assert_eq!(s2.particles[1].xyz, Coordinate::Position{x:3.1,y:2.1,z:1.1});
+        assert_eq!(s3.particles[0].xyz, Coordinate::Position{x:1.2,y:2.2,z:3.2});
+        assert_eq!(s3.particles[1].xyz, Coordinate::Position{x:3.2,y:2.2,z:1.2});
+    }
+    #[test]
+    fn write_xyz() {
+        let s1 = XYZSnapshot::<f32>::new("test".to_string(), vec![
+            "H 1.0 2.0 3.0".parse().unwrap(),
+            "C 3.0 2.0 1.0".parse().unwrap(),
+        ]);
+        let write_result = {
+            let mut buffer = Vec::new();
+            {
+                let mut writer = XYZWriter::new(&mut buffer);
+                writer.write_snapshot(&s1).unwrap();
+            }
+            buffer
+        };
+        eprintln!("{:?}", write_result);
+        let mut reader = XYZReader::new(CoordKind::Position, write_result.as_slice());
+        let s2 = reader.read_snapshot().unwrap();
+
+        assert_eq!(s1, s2);
+    }
+}
+
