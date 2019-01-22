@@ -1,3 +1,4 @@
+//! error handling.
 use std::fmt;
 use std::fmt::Display;
 use failure::{Backtrace, Context, Fail};

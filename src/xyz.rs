@@ -1,9 +1,27 @@
+//! Input and output about xyz format file.
+//!
+//! # example
+//! ```no_run
+//! use trajan::xyz::XYZReader;
+//! let reader = XYZReader::open_pos("example.xyz").unwrap().f64();
+//! for snapshot in reader {
+//!     println!("{} particles in a snapshot", snapshot.particles.len());
+//! }
+//! ```
 use crate::error::{Error, Result};
 use crate::particle::{Attribute, Particle};
 use crate::coordinate::{CoordKind, Coordinate};
 use std::io::{BufRead, Write}; // to use read_line
 
 /// Particle contained in a xyz file.
+///
+/// It may have not only `Position`, but also `Velocity` or `Force` because it
+/// contains `Coordinate` defined in this library. By default, when you read a
+/// line, it becomes `Position` as described in the following way.
+/// ```
+/// use trajan::xyz::XYZParticle;
+/// let xyz = "H 1.00 1.00 1.00".parse::<XYZParticle<f32>>().unwrap();
+/// ```
 #[derive(Debug, PartialEq)]
 pub struct XYZParticle<T> {
     /// name of this particle.

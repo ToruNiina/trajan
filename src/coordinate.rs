@@ -1,3 +1,16 @@
+//! Handles Coordinate information along the different components.
+//!
+//! What kind of coordinate is stored in the file cannot be deduced only from
+//! the file format information. The same format can have a position or a
+//! velocity. Also, after reading coordinate information from file, we need a
+//! way to remember what kind of coordinate is stored in a file. This provides
+//! a way to handle these problem.
+//!
+//! Some files have a signature that represents the kind of coordinate stored.
+//! For them, this information is needed to be changed dynamically, not
+//! statically. So it is implemented by using enums, not a tuple-struct.
+
+
 /// An enum to represent which kind of vector the data means.
 ///
 /// Generally, which kind of vector is contained in a file cannot be deduced by
