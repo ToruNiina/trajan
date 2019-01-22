@@ -1,8 +1,17 @@
 [package]
-name = "trajan"
-version = "0.1.0"
-authors = ["ToruNiina <niina.toru.68u@gmail.com>"]
-edition = "2018"
+name         = "trajan"
+version      = "0.1.0"
+authors      = ["ToruNiina <niina.toru.68u@gmail.com>"]
+edition      = "2018"
+repository   = "https://github.com/ToruNiina/trajan"
+keywords     = ["Molecular Dynamics", "Molecular Simulation", "Trajectory", "Analysis"]
+categories   = ["Science", "Simulation"]
+license      = "MIT"
+readme       = "README.md"
+description  = """
+A library for analysing molecular dynamics trajectories.
+Currently in pre-alpha stage.
+"""
 
 [dependencies]
 failure    = "0.1.5"
