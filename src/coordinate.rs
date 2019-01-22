@@ -31,7 +31,7 @@
 /// let p = Coordinate::<f64>::build(CoordKind::Position, 1.0, 2.0, 3.0);
 /// let v: nalgebra::Vector3<f64> = Into::into(p);
 /// ```
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Coordinate<T> {
     Position{x:T, y:T, z:T},
     Velocity{x:T, y:T, z:T},

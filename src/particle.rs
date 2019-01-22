@@ -15,6 +15,7 @@
 /// other kind of parameters ... ). To get some additional parameters, we need
 /// this kind of struct. `std::any::Any` might be enough for this purpose, but
 /// to improve the efficiency, it is implemented in enum.
+#[derive(Debug)]
 pub enum Attribute {
     Float(f64),
     Integer(i64),
