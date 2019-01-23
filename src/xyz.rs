@@ -10,6 +10,7 @@
 //! ```
 use crate::error::{Error, Result};
 use crate::particle::{Attribute, Particle};
+use crate::snapshot::Snapshot;
 use crate::coordinate::{CoordKind, Coordinate};
 use std::io::{BufRead, Write}; // to use read_line
 
@@ -138,6 +139,55 @@ impl<T> XYZSnapshot<T> {
         self.particles.first().map(|p| p.xyz.which())
     }
 }
+
+impl<T> std::ops::Index<usize> for XYZSnapshot<T> {
+    type Output = XYZParticle<T>;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.particles[index]
+    }
+}
+
+impl<T: nalgebra::Scalar> Snapshot<T> for XYZSnapshot<T> {
+    type Value = T;
+    fn len(&self)  -> usize {
+        self.particles.len()
+    }
+    fn mass(&self) -> std::option::Option<std::vec::Vec<T>> {
+        None
+    }
+    fn positions(&self)
+        -> std::option::Option<std::vec::Vec<nalgebra::Vector3<T>>>
+    {
+        self.particles.iter()
+            .map(|p| p.pos())
+            .collect::<std::option::Option<std::vec::Vec<_>>>()
+    }
+    fn velocities(&self)
+        -> std::option::Option<std::vec::Vec<nalgebra::Vector3<T>>>
+    {
+        self.particles.iter()
+            .map(|p| p.vel())
+            .collect::<std::option::Option<std::vec::Vec<_>>>()
+    }
+    fn forces(&self)
+        -> std::option::Option<std::vec::Vec<nalgebra::Vector3<T>>>
+    {
+        self.particles.iter()
+            .map(|p| p.force())
+            .collect::<std::option::Option<std::vec::Vec<_>>>()
+    }
+    fn attributes(&self, name: &str)
+        -> std::option::Option<std::vec::Vec<Attribute>>
+    {
+        self.particles.iter()
+            .map(|p| p.attribute(name))
+            .collect::<std::option::Option<std::vec::Vec<_>>>()
+    }
+}
+
+
+
 
 /// Reads XYZSnapshot.
 ///
