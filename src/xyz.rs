@@ -432,8 +432,8 @@ mod tests {
         assert_eq!(p.vel(),   None);
         assert_eq!(p.force(), None);
 
-        if let Attribute::String(name) = p.attribute("name".to_string()).unwrap() {
-            assert_eq!(name, "H".to_string());
+        if let Attribute::String(name) = p.attribute("name").unwrap() {
+            assert_eq!(name, "H");
         } else {
             assert!(false);
         }
