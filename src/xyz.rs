@@ -106,8 +106,8 @@ impl<T: nalgebra::Scalar> Particle<T> for XYZParticle<T> {
             None
         }
     }
-    fn attribute(&self, name: std::string::String) -> Option<Attribute> {
-        return match name.as_str() {
+    fn attribute(&self, name: &str) -> Option<Attribute> {
+        return match name {
             "name" => Some(Attribute::String(self.name.clone())),
             _ => None,
         }
