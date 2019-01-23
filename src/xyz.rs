@@ -153,7 +153,7 @@ impl<T: nalgebra::Scalar> Snapshot<T> for XYZSnapshot<T> {
     fn len(&self)  -> usize {
         self.particles.len()
     }
-    fn mass(&self) -> std::option::Option<std::vec::Vec<T>> {
+    fn masses(&self) -> std::option::Option<std::vec::Vec<T>> {
         None
     }
     fn positions(&self)
