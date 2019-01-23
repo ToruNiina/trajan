@@ -1,4 +1,4 @@
-//! A module to handle trajectory contained as any kind of format in the same way.
+//! A module to handle snapshot contained as any kind of format in the same way.
 //!
 //! It requires that Snapshot should be an indexable and the Output of Index
 //! implementes trajan::particle::Particle trait.
