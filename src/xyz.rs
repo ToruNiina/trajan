@@ -186,9 +186,6 @@ impl<T: nalgebra::Scalar> Snapshot<T> for XYZSnapshot<T> {
     }
 }
 
-
-
-
 /// Reads XYZSnapshot.
 ///
 /// It can be used as a iterator that reads snapshots until it reaches to the
