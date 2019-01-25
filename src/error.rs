@@ -14,6 +14,10 @@ pub enum ErrorKind {
     InvalidFormat{
         error: std::string::String
     },
+    #[fail(display = "Invalid Condition: {:?}", error)]
+    InvalidCondition{
+        error: std::string::String
+    },
 }
 impl std::cmp::Eq for ErrorKind {}
 
@@ -92,6 +96,11 @@ impl Error {
     /// represents a portion of an input that is formatted in the invalid way.
     pub fn invalid_format(s: std::string::String) -> Error {
         Error{inner: failure::Context::new(ErrorKind::InvalidFormat{error: s})}
+    }
+    /// Constructs `trajan::error::Error` from `std::string::String` that
+    /// represents some required condition is violated.
+    pub fn invalid_condition(s: std::string::String) -> Error {
+        Error{inner: failure::Context::new(ErrorKind::InvalidCondition{error: s})}
     }
 }
 
